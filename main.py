@@ -51,4 +51,11 @@ def create_movies(id:int = Body(), title:str = Body(), overview:str = Body(), ye
 @app.put("/movies{id}", tags=["movies"] )
 def update_movie(id:int, title:str = Body(), overview:str = Body(), year:int = Body(), rating:float = Body(), category:str = Body()):
     # logica para editar la pelicula
-    
+    for item in movies:
+        if item["id"] == id:
+            item["title"] = title,
+            item["overview"] = overview,
+            item["year"] = year,
+            item["year"] = year,
+            item["rating"] = rating,
+            item["category"] = category
