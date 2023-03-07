@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Body, Path
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Path, Query
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 from typing import Optional
 
@@ -27,7 +27,7 @@ class Movie(BaseModel):
             "overview": "Movie summary",
             "year": 2010,
             "rating": 0.0,
-            "category": "Genre"
+            "category": "category"
         }
 
 
@@ -50,22 +50,25 @@ def message():
 
 @app.get('/movies', tags=['movies'])
 def get_movies():
-    return movies
+    return JSONResponse(content=movies)
 
 @app.get("/movies/{id}", tags=["movies"])
-def get_movie(id: int):
-    return id
+def get_movie(id: int = Path()):
+    for item in movies:
+        if item["id"] == id:
+            return JSONResponse(content=item)
+        return JSONResponse(content=[])
 
 @app.get("/movies/", tags=["movies"])
-def get_movies_by_category(category: str):
-    
+def get_movies_by_category(category: str = Query(min_length=5, max_length=15)):
     # usando list comprehension
-    return [movie for movie in movies if movie['genre'] == category]
+    data = [movie for movie in movies if movie['category'] == category]
+    return JSONResponse(content=data)
 
 @app.post("/movies/", tags=["movies"])
 def create_movies(movie: Movie):
     movies.append(movie)
-    return movies
+    return JSONResponse(content={"message": "Se registró la pelicula"})
 
 @app.put("/movies{id}", tags=["movies"] )
 def update_movie(id:int, movie:Movie):
@@ -77,10 +80,11 @@ def update_movie(id:int, movie:Movie):
             item["year"] = movie.year
             item["rating"] = movie.rating
             item["category"] = movie.category
+            return JSONResponse(content={"message": "Se modificó la pelicula"})
 
 @app.delete("/movies{id}", tags=["movies"])
 def delete_movie(id:int):
     for item in movies:
         if item["id"] == id:
             movies.remove(item)
-            return movies
+            return JSONResponse(content={"message":"Se eliminó la pelicula"})
