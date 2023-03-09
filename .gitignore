@@ -132,3 +132,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 >>>>>>> d0bd0d452fe86d65c65c0efefebaba90b954671f
+
+.fake
+
+# Data bases
+*.sqlite

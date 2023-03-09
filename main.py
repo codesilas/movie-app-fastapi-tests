@@ -4,10 +4,16 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from jwt_manager import create_token, validate_token
 from fastapi.security import HTTPBearer
+from config.database import Session, engine, Base
+from models.movie import Movie as MovieModel # alias para evitar confución con la otra clase "Movie"
+
 
 app = FastAPI()
 app.title = "Mi aplicación con  FastAPI"
 app.version = "0.0.1"
+
+
+Base.metadata.create_all(bind=engine)
 
 
 class JWTBearer(HTTPBearer):
@@ -88,7 +94,10 @@ def get_movies_by_category(category: str = Query(min_length=5, max_length=15)) -
 
 @app.post('/movies', tags=['movies'], response_model=dict, status_code=201)
 def create_movie(movie: Movie) -> dict:
-    movies.append(movie)
+    db = Session() # creación de sesión
+    new_movie = MovieModel(**movie.dict()) # para ingresar datos, convertir parametro movie a dict y colocar ** para que sean parametros
+    db.add(new_movie)
+    db.commit()
     return JSONResponse(status_code=201, content={"message": "Se ha registrado la película"})
 
 @app.put('/movies/{id}', tags=['movies'], response_model=dict, status_code=200)
